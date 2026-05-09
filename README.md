@@ -162,6 +162,9 @@ Ran `Update Gravity` after adding all lists to rebuild the blocklist database.
 | Power consumption | ~0.5W idle |
 | Software installed on clients | None |
 
+![Pi-hole Dashboard](screenshots/pihole-dashboard.png)
+
+
 ## Lessons Learned
 
 - Gained hands-on experience with DNS at the network level. Understanding how DNS resolution order works (IPv6 before IPv4) was critical to diagnosing why Pi-hole was being bypassed
