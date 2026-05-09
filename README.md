@@ -26,8 +26,7 @@ Built as part of a home lab environment alongside an Active Directory domain and
 
 ## Network Diagram
 
-<!-- TODO: Add network diagram image -->
-<!-- ![Network Diagram](screenshots/network-diagram.png) -->
+![Network Diagram](screenshots/network-diagram.png)
 
 | Device | Hostname | IP Address | Role |
 |--------|----------|------------|------|
@@ -39,6 +38,27 @@ Built as part of a home lab environment alongside an Active Directory domain and
 - Upstream DNS: Cloudflare `1.1.1.1`
 - Pi-hole Admin Dashboard: `http://10.0.0.2/admin`
 
+## How it works
+
+```mermaid
+graph TD
+    A[Client Device] -->|1. Request: 'ads.google.com'| B(Router)
+    B -->|2. Forward DNS Query| C{Pi-hole on Pi Zero 2 W}
+    
+    C -- Check Blocklist --> D{Is it blocked?}
+    
+    D -- YES --> E[Return 0.0.0.0]
+    E -->|3. Blocked Response| B
+    B -->|4. Ad fails to load| A
+    
+    D -- NO --> F[Forward to Upstream DNS e.g. 8.8.8.8]
+    F -->|3. Get Real IP| G[Internet]
+    G -->|4. Return Real IP| F
+    F -->|5. Return Real IP| C
+    C -->|6. Return Real IP| B
+    B -->|7. Content Loads| A
+```
+
 ## Configuration Steps
 
 ### 1. Raspberry Pi OS Setup
@@ -47,17 +67,16 @@ Built as part of a home lab environment alongside an Active Directory domain and
 - Flashed Raspberry Pi OS Lite (64-bit) onto a 64GB microSD card
 - Configured hostname (`pihole`), username (`pi`), Wi-Fi credentials, and SSH during flashing using the OS customisation menu
 - Inserted microSD into Pi Zero 2W and powered it via micro USB
-
-<!-- ![Raspberry Pi Imager Settings](screenshots/rpi-imager-settings.png) -->
+![Raspberry Pi Imager Settings](screenshots/rpi-imager-settings.png)
 
 ### 2. First Boot and SSH Access
 
 - Waited 90 seconds for first boot to complete
 - Found the Pi's IP address in the Rogers gateway device list
-- Connected via SSH from PowerShell: `ssh pi@10.0.0.2`
+![IP Address Before Reservation](screenshots/before-ip-address-pihole.png)
+- Connected via SSH from PowerShell: `ssh pi@10.0.0.158`
+![SSH Connection](screenshots/ssh-connection.png)
 - Ran `sudo apt update && sudo apt upgrade -y` before proceeding
-
-<!-- ![SSH Connection](screenshots/ssh-connection.png) -->
 
 ### 3. Pi-hole Installation
 
@@ -66,19 +85,19 @@ Built as part of a home lab environment alongside an Active Directory domain and
   curl -sSL https://install.pi-hole.net | bash
   ```
 - Selected Cloudflare (1.1.1.1) as the upstream DNS provider
+![Cloudflare Selection as DNS Provider](screenshots/cloudflare-selection.png)
 - Enabled query logging and set privacy mode to "Show everything"
 - Web admin interface installed automatically
-
-<!-- ![Pi-hole Installation Complete](screenshots/pihole-install-complete.png) -->
+![Pi-hole Installation Complete](screenshots/pihole-install-complete.png)
 
 ### 4. Static IP Reservation
 
 - Logged into Rogers Ignite Gateway at `10.0.0.1`
 - Created a DHCP reservation for the Pi's MAC address (`88:A2:9E:4F:17:D4`)
 - Assigned static IP: `10.0.0.2`
+- Changed and Reserved its IP to `10.0.0.2`
 - Added comment: "Raspberry Pi Zero 2W working as Pihole in the home office"
-
-<!-- ![DHCP Reservation](screenshots/dhcp-reservation.png) -->
+![DHCP Reservation](screenshots/dhcp-reservation.png)
 
 ### 5. Blocklists Configuration
 
@@ -103,8 +122,7 @@ Total domains blocked after deduplication: **272,293**
 
 Ran `Update Gravity` after adding all lists to rebuild the blocklist database.
 
-<!-- ![Adlists Page](screenshots/adlists.png) -->
-<!-- ![Gravity Update](screenshots/gravity-update.png) -->
+![Adlists Page](screenshots/adlists.png)
 
 ### 6. DNS Configuration on Devices
 
@@ -127,7 +145,7 @@ Ran `Update Gravity` after adding all lists to rebuild the blocklist database.
 - Ran `nslookup google.com` and confirmed `Server: 10.0.0.2`
 - Ran `nslookup doubleclick.net` and confirmed the domain was blocked (returned `0.0.0.0`)
 
-<!-- ![DNS Verification](screenshots/nslookup-verification.png) -->
+![DNS Verification](screenshots/nslookup-verification.png)
 
 ## Results
 
@@ -156,6 +174,3 @@ Ran `Update Gravity` after adding all lists to rebuild the blocklist database.
 - [ ] Explore Pi-hole's DHCP server to fully replace router DHCP
 - [ ] Create a network diagram including all lab devices (Proxmox, AD domain, Pi-hole)
 
-## Related Projects
-
-- [Active Directory Lab](https://github.com/anmolmanku/active-directory-project) — Windows Server 2022 domain controller with OUs, users, security groups, and GPOs
