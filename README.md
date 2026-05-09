@@ -12,6 +12,7 @@ Built as part of a home lab environment alongside an Active Directory domain and
 - Reserving a static IP via DHCP on a Rogers Ignite gateway
 - Configuring multiple curated blocklists for ads, tracking, telemetry, malware, and phishing
 - Resolving IPv6 DNS override issues on Windows to enforce Pi-hole usage
+- Blocking adult content network-wide using curated DNS blocklists
 - Manually configuring per-device DNS on a locked-down ISP router
 
 ## Technologies Used
@@ -33,6 +34,7 @@ Built as part of a home lab environment alongside an Active Directory domain and
 | Raspberry Pi Zero 2W | pihole | 10.0.0.2 | DNS Sinkhole (Pi-hole) |
 | Rogers Ignite Gateway | — | 10.0.0.1 | Router, DHCP Server |
 | Windows Laptop | Manku | 10.0.0.228 | Primary workstation |
+| Phone | — | 10.0.0.69 | Primary Phone | 
 
 - Network: `10.0.0.0/24` (Home Wi-Fi and Ethernet)
 - Upstream DNS: Cloudflare `1.1.1.1`
@@ -101,7 +103,7 @@ graph TD
 
 ### 5. Blocklists Configuration
 
-Added 12 curated blocklists via the Pi-hole admin dashboard:
+Added 14 curated blocklists via the Pi-hole admin dashboard:
 
 | List | Purpose |
 |------|---------|
@@ -117,8 +119,10 @@ Added 12 curated blocklists via the Pi-hole admin dashboard:
 | Firebog Admiral | Admiral consent and ad management tracking |
 | Firebog Prigent-Ads | Prigent ads and tracking domains |
 | adblock-nocoin-list | Browser-based cryptomining scripts |
+| chadmayfield/pi_blocklist_porn_all | Adult content — comprehensive porn domain blocklist |
+| nsfw.oisd.nl | OISD NSFW — well-maintained adult content blocklist |
 
-Total domains blocked after deduplication: **272,293**
+Total domains blocked after deduplication: **2,499,204**
 
 Ran `Update Gravity` after adding all lists to rebuild the blocklist database.
 
@@ -151,8 +155,8 @@ Ran `Update Gravity` after adding all lists to rebuild the blocklist database.
 
 | Metric | Value |
 |--------|-------|
-| Domains on blocklist | 272,293 |
-| Blocklists active | 12 |
+| Domains on blocklist | 2,499,204 |
+| Blocklists active | 14 |
 | Upstream DNS | Cloudflare 1.1.1.1 |
 | Hardware cost | ~$15 CAD (Raspberry Pi Zero 2W) |
 | Power consumption | ~0.5W idle |
@@ -170,7 +174,5 @@ Ran `Update Gravity` after adding all lists to rebuild the blocklist database.
 
 - [ ] Install Tailscale on the Pi for remote dashboard access and SSH
 - [ ] Add a dedicated router (bridge mode on Rogers gateway) for true network-wide DNS without per-device config
-- [ ] Block adult content categories via Pi-hole regex and blocklists
 - [ ] Explore Pi-hole's DHCP server to fully replace router DHCP
 - [ ] Create a network diagram including all lab devices (Proxmox, AD domain, Pi-hole)
-
